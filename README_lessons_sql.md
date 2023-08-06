@@ -98,4 +98,59 @@ select cars.car_id, models.name from cars inner join models on cars.model_id = m
 select cars.car_id, creators.creator, creators.brand from cars left join creators on cars.creator_id = creators.creator_id; - даёт айди машины и её создателя
 select cars.car_id, models.name, creators.creator, creators.brand from cars inner join models ON cars.model_id = models.model_id inner join creators ON cars.creator_id = creators.creator_id; - даёт всё ':)'
 ```
+# Sql module 2
+```sql
+select concat('This is ', name, ',', case when gender = 'm' then 'he' else 'she' end,' has emeil ', email) as info from users;
+```
+**result**               
+
+ This is Vasya,he has emeil mmm@mmail.com
+ 
+ This is Alex,he has emeil mmm@gmail.com
+ 
+ This is Alexey,he has emeil alexey@gmail.com
+ 
+ This is Helen,she has emeil hell@gmail.com
+ 
+ This is Jenny,she has emeil eachup@gmail.com
+ 
+ This is Lora,she has emeil tpicks@gmail.com
+
+```sql
+SELECT 'We have ' || COUNT(*) || ' boys!' AS "Gender information:" FROM users WHERE gender = 'm'                                                                                      
+UNION                          
+SELECT 'We have ' || COUNT(*) || ' girls!' AS "Gender information:" FROM users WHERE gender = 'f';
+```
+**result** 
+
+Gender information: 
+
+---------------------
+ We have 3 boys!
+ 
+ We have 3 girls!
+ 
+```sql
+select name, count(word.id) as words from vocabulary left join word on vocabulary.id = word.vocabulary_id group by vocabulary.name, vocabulary.id order by vocabulary.id;
+```
+**result**
+
+name   | words 
+
+---------+-------
+
+ animals |    10
+
+ school  |    10
+
+ nature  |    10
+
+ human   |    10
+
+ SF      |    10
+
+
+
+
+
 
