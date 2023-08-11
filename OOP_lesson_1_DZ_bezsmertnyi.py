@@ -41,6 +41,13 @@ class Chess(ABC):
         else:
             print("Дошка не настільки велика, оло!")
 
+    def _calculate_coordinate_differences(self, new_position: Tuple[int, int]) -> Tuple[int, int]:
+        x, y = new_position
+        if not self._is_valid_position(x, y):
+            return False  # Invalid position
+        difference_x = abs(x - self.position[0])
+        difference_y = abs(y - self.position[1])
+        return difference_x, difference_y
     @abstractmethod
     def can_reach_to_position(self, new_position: Tuple[int, int]) -> bool:
         pass
@@ -57,43 +64,23 @@ class Pawn(Chess):
 
 class Horse(Chess):
     def can_reach_to_position(self, new_position: Tuple[int, int]) -> bool:
-        x,y = new_position
-        if not self._is_valid_position(x,y):
-            return False
-        difference_x = abs(x - self.position[0])
-        difference_y = abs(y - self.position[1])
+        difference_x, difference_y = self._calculate_coordinate_differences(new_position)
         return (difference_x == 2 and difference_y == 1) or (difference_x == 1 and difference_y == 2)
 class Bishop(Chess):
     def can_reach_to_position(self, new_position: Tuple[int, int]) -> bool:
-        x,y = new_position
-        if not self._is_valid_position(x,y):
-            return False
-        difference_x = abs(x - self.position[0])
-        difference_y = abs(y - self.position[1])
+        difference_x, difference_y = self._calculate_coordinate_differences(new_position)
         return difference_x == difference_y and x != self.position[0]
 class Rook(Chess):
     def can_reach_to_position(self, new_position: Tuple[int, int]) -> bool:
-        x,y = new_position
-        if not self._is_valid_position(x,y):
-            return False
-        difference_x = abs(x - self.position[0])
-        difference_y = abs(y - self.position[1])
+        difference_x, difference_y = self._calculate_coordinate_differences(new_position)
         return (difference_x == 0) or (difference_y == 0)
 class Queen(Chess):
     def can_reach_to_position(self, new_position: Tuple[int, int]) -> bool:
-        x,y = new_position
-        if not self._is_valid_position(x,y):
-            return False
-        difference_x = abs(x - self.position[0])
-        difference_y = abs(y - self.position[1])
+        difference_x, difference_y = self._calculate_coordinate_differences(new_position)
         return (difference_x == 0) or (difference_y == 0) or difference_x == difference_y
 class King(Chess):
     def can_reach_to_position(self, new_position: Tuple[int, int]) -> bool:
-        x,y = new_position
-        if not self._is_valid_position(x,y):
-            return False
-        difference_x = abs(x - self.position[0])
-        difference_y = abs(y - self.position[1])
+        difference_x, difference_y = self._calculate_coordinate_differences(new_position)
         return (difference_x <= 1 and difference_y <= 1)
 
 
