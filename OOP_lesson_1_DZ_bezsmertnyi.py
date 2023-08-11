@@ -15,40 +15,38 @@
 # клітинку, а повертає список із фігур. Але тільки тих, які можуть за один хід дістатися цієї клітини.
 #
 # * Скрізь описати типізації (у функціях, атрибутах та методах)
-from abc import abstractmethod
-class Chess():
-    def __init__(self,color,position): #цвет - строка, позиция - тюпл
+from typing import List, Tuple
+from abc import ABC, abstractmethod
+class Chess(ABC):
+    def __init__(self, color: str, position: Tuple[int, int]):
         self.color = color
         self.position = position
-    def change_color(self): #ничего не возвращаем, меняем значение цвета
+    def change_color(self) -> None:
         if self.color == "білий":
             self.color = "чорний"
         else:
             self.color = "білий"
+    def _is_valid_position(self, x: int, y: int) -> bool:
+        return 0<=x<=7 and 0<=y<=7
 
-    def _is_valid_position(self,x,y): #x - int, y - int
-        return 0<=x<=7 and 0<=y<=7 #возвращаем bool
-
-    def can_move_to_position(self,new_position): #new_position - тюпл из 2 значений
+    def can_move_to_position(self, new_position: Tuple[int, int]) -> bool:
         if len(new_position) == 2:
             x,y = new_position
-            return self._is_valid_position(x,y) #вернёт bool
+            return self._is_valid_position(x,y)
         return False
 
-    def change_position(self,new_position): #new_position - тюпл из 2 значений
-        if self.can_move_to_position(new_position): #если True, меняем значение позиции на новое
+    def change_position(self, new_position: Tuple[int, int]) -> None:
+        if self.can_move_to_position(new_position):
             self.position = new_position
         else:
             print("Дошка не настільки велика, оло!")
+
     @abstractmethod
-    def can_reach_to_position(self,new_position): #new_position - тюпл из 2 значений, вернёт bool
+    def can_reach_to_position(self, new_position: Tuple[int, int]) -> bool:
         pass
 
-#во всех остальных классах принцип одинаковый, берем значение новой позиции
-#и проверяем ограничения от 0 до 7, и потом смотрим для каждой фигуры, можно ли переместить на новую позицию.
-#в конце возвращаем bool значение
 class Pawn(Chess):
-    def can_reach_to_position(self, new_position):
+    def can_reach_to_position(self, new_position: Tuple[int, int]) -> bool:
         x, y = new_position
         if not self._is_valid_position(x,y):
             return False
@@ -58,7 +56,7 @@ class Pawn(Chess):
             return x == self.position[0] and y == self.position[1] - 1
 
 class Horse(Chess):
-    def can_reach_to_position(self,new_position):
+    def can_reach_to_position(self, new_position: Tuple[int, int]) -> bool:
         x,y = new_position
         if not self._is_valid_position(x,y):
             return False
@@ -66,7 +64,7 @@ class Horse(Chess):
         difference_y = abs(y - self.position[1])
         return (difference_x == 2 and difference_y == 1) or (difference_x == 1 and difference_y == 2)
 class Bishop(Chess):
-    def can_reach_to_position(self,new_position):
+    def can_reach_to_position(self, new_position: Tuple[int, int]) -> bool:
         x,y = new_position
         if not self._is_valid_position(x,y):
             return False
@@ -74,7 +72,7 @@ class Bishop(Chess):
         difference_y = abs(y - self.position[1])
         return difference_x == difference_y and x != self.position[0]
 class Rook(Chess):
-    def can_reach_to_position(self,new_position):
+    def can_reach_to_position(self, new_position: Tuple[int, int]) -> bool:
         x,y = new_position
         if not self._is_valid_position(x,y):
             return False
@@ -82,7 +80,7 @@ class Rook(Chess):
         difference_y = abs(y - self.position[1])
         return (difference_x == 0) or (difference_y == 0)
 class Queen(Chess):
-    def can_reach_to_position(self,new_position):
+    def can_reach_to_position(self, new_position: Tuple[int, int]) -> bool:
         x,y = new_position
         if not self._is_valid_position(x,y):
             return False
@@ -90,7 +88,7 @@ class Queen(Chess):
         difference_y = abs(y - self.position[1])
         return (difference_x == 0) or (difference_y == 0) or difference_x == difference_y
 class King(Chess):
-    def can_reach_to_position(self,new_position):
+    def can_reach_to_position(self, new_position: Tuple[int, int]) -> bool:
         x,y = new_position
         if not self._is_valid_position(x,y):
             return False
@@ -99,31 +97,64 @@ class King(Chess):
         return (difference_x <= 1 and difference_y <= 1)
 
 
-def can_all_figures_reach_to_new_position(figures,new_position): #передаю в функцию список моих объектов фигур и тюпл с 2 позициями
+def can_all_figures_reach_to_new_position(figures: List[Chess], new_position: Tuple[int, int]) -> List[Chess]:
     reach_true = []
     for figure in figures:
         if figure.can_reach_to_position(new_position):
             reach_true.append(figure)
-    return reach_true #возвращаю список фигур, которые могут переместиться на новую позицию
+    return reach_true
 
-pawn = Pawn("білий", (1, 1)) #цвет и позиция фигуры
+pawn = Pawn("білий", (1, 1))
 bishop = Bishop("білий", (2, 2))
 horse = Horse("Чорний", (3,2))
 rook = Rook("білий", (4, 1))
 queen = Queen("Чорний", (1, 3))
 king = King("Чорний", (3, 3))
 
-figures = [pawn,bishop,horse,rook,queen,king] #закидываем фигуры в список, чтобы проще было обрабатывать
-new_position = (1,4) #новая позиция
+figures = [pawn,bishop,horse,rook,queen,king]
+new_position = (1,4)
 
 reach = can_all_figures_reach_to_new_position(figures,new_position)
 for figure in reach:
-    print(f"{figure.color} {figure.__class__.__name__}") #вывод фигур, которые можно переместить на новую позицию
+    print(f"{figure.color} {figure.__class__.__name__}")
 
 # chase1 = Chess("чорний",(2,3))
 # chase1.change_color()
 # print(chase1.color)
 # chase1.change_position((1,3))
 # print(chase1.position)
+
+#PHONE Lesson
+class Phone:
+    number = ''
+    _incoming_call = 0
+
+    def set_phone_number(self, number):
+        self.number = number
+
+    def _get_incoming_call(self):
+        return self._incoming_call
+
+    def adding_income_calls(self):
+        self._incoming_call += 1
+
+
+phone1 = Phone()
+phone2 = Phone()
+phone3 = Phone()
+phone1.set_phone_number('380663902048')
+phone2.set_phone_number('380993902048')
+phone3.set_phone_number('380503902048')
+phone1._get_incoming_call()
+phone1.adding_income_calls()
+phone2.adding_income_calls()
+phone3.adding_income_calls()
+phone3.adding_income_calls()
+
+col = [phone1, phone2, phone3]
+sum = 0
+for i in col:
+    sum += i._get_incoming_call()
+print(sum)
 
 
