@@ -98,7 +98,7 @@ class Planet:
 human1 = Human("Denys", 1999)
 human2 = Human("Denys", 1999)
 human3 = Human("Sasha", 1997)
-print(human1.__str__(),",",human1.get_age(),"years")
+print(human1,",",human1.get_age(),"years")
 
 planet1 = Planet("Mars")
 
@@ -112,6 +112,6 @@ planet2.add_human(human1)
 planet2.add_human(human2)
 
 
-print(planet1.__str__(), f"and number of humans on the planet: {planet1.get_count()}")
+print(planet1, f"and number of humans on the planet: {planet1.get_count()}")
 
 print(human1==human2, planet1==planet2)
