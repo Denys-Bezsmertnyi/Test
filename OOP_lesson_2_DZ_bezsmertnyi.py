@@ -1,4 +1,4 @@
-#LESSON 2 PRACTICE
+#LESSON 2 PRACTICE + LESSON 3
 
 # Створити клас Employee.
 # __init__ має приймати наступні аргументи: ім’я, ЗП за один робочий день.
@@ -9,6 +9,15 @@
 # “I come to the office and start to hiring.” - для Recruiter
 # Перевизначити методи __str__, щоб они повертали строку: “Посада: Ім’я”
 # Зробити можливим порівнювати Employee по рівню ЗП.
+# +++++++++++++++++++++++++
+#Створити метод check_salary(self, days), який розраховує ЗП за передану кількість днів.
+#** Зробити можливим, щоб метод check_salary рахував ЗП з початку місяця до поточного дня, не враховуючи вихідні дні.
+#Додати в конструктор класу Developer атрибут tech_stack (список з назвами технологій).
+#Для класу Developer зробити порівняння за кількістю технологій.
+#Зробити можливим операцію додавання об’єктів класу Developer. Результатом має бути новий об’єкт, в якому name = name1 + ‘ ’ + name2, 
+#a tech_stack - список з технологій двох об’єктів (тільки унікальні #значення), ЗП - більша з двох.
+
+import datetime
 
 class Employee:
     def __init__(self, name, day_salary):
@@ -24,26 +33,60 @@ class Employee:
     def __gt__(self, other):
         return self.day_salary > other.day_salary
 
+    def check_salary(self, days=None):
+        if days is None:
+            today = datetime.date.today()
+            days = today.day
+            if days < 7:
+                return days * self.day_salary
+            else:
+                weeks = days // 7
+                return (days - (weeks * 2)) * self.day_salary
+        else:
+            return self.day_salary * days
+
 class Recruiter(Employee):
     def work(self):
         return "I come to the office and start to hiring."
 
 
 class Developer(Employee):
+    def __init__(self, name, day_salary, tech_stack):
+        super().__init__(name, day_salary)
+        self.tech_stack = tech_stack
     def work(self):
         return "I come to the office and start to coding."
 
+    def __gt__(self, other):
+        return len(self.tech_stack) > len(other.tech_stack)
+
+    def __add__(self, other):
+        added_name = self.name + ' ' + other.name
+        added_tech_stack = list(set(self.tech_stack + other.tech_stack))
+        added_salary = max(self.day_salary, other.day_salary)
+
+        return Developer(added_name, added_salary, added_tech_stack)
 
 Employee1 = Employee("Denys", 999)
 Employee2 = Recruiter("Mark", 550)
-Employee3 = Developer("Sofia", 720)
-Employee4 = Employee("Sasha", 100)
+Employee3 = Developer("Sofia", 720, ["Python", "JavaScript", "HTML", "CSS"])
+Employee4 = Developer("John", 800, ["Java", "C#", "C++"])
 
 print(Employee1.work(), '\n', Employee2.work(), '\n', Employee3.work(), sep='')
 
 print(Employee1, '\n', Employee2, '\n', Employee3, sep='')
 
-print(Employee1>Employee4, '\n', Employee2>Employee3, sep='')
+print(Employee1 > Employee4, '\n', Employee2 > Employee3, sep='')
+
+print(Employee1.check_salary())
+
+print(Employee3>Employee4)
+
+combined_developer = Employee3 + Employee4
+
+print(combined_developer.name)
+print(combined_developer.tech_stack)
+print(combined_developer.day_salary)
 
 #LESSON 2 HOMEWORK
 CURRENT = 2023
