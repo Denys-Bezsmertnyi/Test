@@ -37,13 +37,14 @@ class Employee:
         if days is None:
             today = datetime.date.today()
             days = today.day
-            if days < 7:
-                return days * self.day_salary
-            else:
-                weeks = days // 7
-                return (days - (weeks * 2)) * self.day_salary
-        else:
-            return self.day_salary * days
+
+        work_days = 0
+        current_date = datetime.date.today()
+        for day in range(1, days + 1):
+            if current_date.replace(day=day).weekday() < 5:
+                work_days += 1
+
+        return self.day_salary * work_days
 
 class Recruiter(Employee):
     def work(self):
