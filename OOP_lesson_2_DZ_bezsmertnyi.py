@@ -1,31 +1,49 @@
-#LESSON 2 PRACTICE + LESSON 3
-
-# Створити клас Employee.
-# __init__ має приймати наступні аргументи: ім’я, ЗП за один робочий день.
-# Створити метод work(self, …) який повертає строку “I come to the office.”
-# Створити класи Recruiter та Developer, які наслідують клас Employee.
-# Перевизначити методи work в класах R та D, щоб вони повертали значення:
-# “I come to the office and start to coding.” - для Developer
-# “I come to the office and start to hiring.” - для Recruiter
-# Перевизначити методи __str__, щоб они повертали строку: “Посада: Ім’я”
-# Зробити можливим порівнювати Employee по рівню ЗП.
-# +++++++++++++++++++++++++
-#Створити метод check_salary(self, days), який розраховує ЗП за передану кількість днів.
-#** Зробити можливим, щоб метод check_salary рахував ЗП з початку місяця до поточного дня, не враховуючи вихідні дні.
-#Додати в конструктор класу Developer атрибут tech_stack (список з назвами технологій).
-#Для класу Developer зробити порівняння за кількістю технологій.
-#Зробити можливим операцію додавання об’єктів класу Developer. Результатом має бути новий об’єкт, в якому name = name1 + ‘ ’ + name2, 
-#a tech_stack - список з технологій двох об’єктів (тільки унікальні #значення), ЗП - більша з двох.
-
+from datetime import datetime as dt
+import csv
+import logging
+import traceback
 import datetime
+import requests
+
+from exceptions import EmailAlreadyExistsException
+
+logging.basicConfig(filename=r'C:\Users\gerby\PycharmProjects\pythonProject1\logs.txt', level=logging.ERROR)
 
 class Employee:
-    def __init__(self, name, day_salary):
+    def __init__(self, name, day_salary, email=None):
         self.name = name
         self.day_salary = day_salary
+        if email:
+            self.email = email
+            try:
+                self.validate(email)
+                self.save_email("emails.csv")
+            except EmailAlreadyExistsException:
+                print("Email already exists. Logging exception...")
+                self.log_exception()
+
+
+    def save_email(self, emails):
+        with open(emails, mode='a', newline='') as file:
+            save = csv.writer(file)
+            save.writerow([self.email])
+
+    def validate(self, email):
+        with open("emails.csv", mode='r', newline='') as file:
+            reader = csv.reader(file)
+            for row in reader:
+                if email in row:
+                    raise EmailAlreadyExistsException("Email already exists!")
+        print("Email validation successful.")
+
+    def log_exception(self):
+        current_datetime = dt.now().strftime('%Y-%m-%d %H:%M:%S')
+        traceback_info = traceback.format_exc()
+        log_message = f"{current_datetime} | {traceback_info}"
+        logging.error(log_message)
 
     def work(self):
-        return "I come to the office."
+        return "I come to the office"
 
     def __str__(self):
         return f"{self.__class__.__name__} {self.name}"
@@ -33,11 +51,16 @@ class Employee:
     def __gt__(self, other):
         return self.day_salary > other.day_salary
 
+    def __lt__(self, other):
+        return self.day_salary < other.day_salary
+
+    def __eq__(self, other):
+        return self.day_salary == other.day_salary
+
     def check_salary(self, days=None):
         if days is None:
             today = datetime.date.today()
             days = today.day
-
         work_days = 0
         current_date = datetime.date.today()
         for day in range(1, days + 1):
@@ -46,17 +69,21 @@ class Employee:
 
         return self.day_salary * work_days
 
+
 class Recruiter(Employee):
     def work(self):
-        return "I come to the office and start to hiring."
+        base_words = super().work()
+        return base_words + "and start to hiring."
 
 
 class Developer(Employee):
     def __init__(self, name, day_salary, tech_stack):
         super().__init__(name, day_salary)
         self.tech_stack = tech_stack
+
     def work(self):
-        return "I come to the office and start to coding."
+        base_words = super().work()
+        return base_words + "and start to coding."
 
     def __gt__(self, other):
         return len(self.tech_stack) > len(other.tech_stack)
@@ -68,94 +95,73 @@ class Developer(Employee):
 
         return Developer(added_name, added_salary, added_tech_stack)
 
-Employee1 = Employee("Denys", 999)
-Employee2 = Recruiter("Mark", 550)
-Employee3 = Developer("Sofia", 720, ["Python", "JavaScript", "HTML", "CSS"])
-Employee4 = Developer("John", 800, ["Java", "C#", "C++"])
 
-print(Employee1.work(), '\n', Employee2.work(), '\n', Employee3.work(), sep='')
+employee1 = Employee("Denys", 999, 'gerbyboyz123@gmail.com')
+employee2 = Recruiter("Mark", 550, 'pupochek22812@yahoo.com')
+employee3 = Developer("Sofia", 550, ["Python", "JavaScript", "HTML", "CSS"])
+employee4 = Developer("John", 800, ["Java", "C#", "C++"])
 
-print(Employee1, '\n', Employee2, '\n', Employee3, sep='')
+print(employee1.work(), '\n', employee2.work(), '\n', employee3.work(), sep='')
 
-print(Employee1 > Employee4, '\n', Employee2 > Employee3, sep='')
+print(employee1, '\n', employee2, '\n', employee3, sep='')
 
-print(Employee1.check_salary())
+print(employee1 > employee4, '\n', employee2 > employee3, '\n', employee2 == employee3, sep='')
 
-print(Employee3>Employee4)
+print(employee1.check_salary())
 
-combined_developer = Employee3 + Employee4
+print(employee3 > employee4)
+
+combined_developer = employee3 + employee4
 
 print(combined_developer.name)
 print(combined_developer.tech_stack)
 print(combined_developer.day_salary)
 
-#LESSON 2 HOMEWORK
-CURRENT = 2023
-class Human:
-    def __init__(self, name, birth_date):
-        self.name = name
-        self.birth_date = birth_date
+class Candidate:
+    def __init__(self,first_name,last_name,email,tech_stack,main_skill,main_skill_grade):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.email = email
+        self.tech_stack = tech_stack
+        self.main_skill = main_skill
+        self.main_skill_grade = main_skill_grade
 
-    def to_str(self):
-        return f'Person: {self.name} and birth {self.birth_date}'
+    @property
+    def full_name(self):
+        """
+        return full name
+        """
+        return f'{self.first_name} {self.last_name}'
 
-    def __str__(self):
-        return self.to_str()
+    @classmethod
+    def generate_candidates(cls, file_or_url):
+        candidates = []
 
-    def get_age(self):
-        return CURRENT - self.birth_date
+        if file_or_url.startswith("http://") or file_or_url.startswith("https://"):
+            response = requests.get(file_or_url)
+            response_text = response.text
+        else:
+            with open(file_or_url, mode = "r", newline = '') as file:
+                response_text = file.read()
+        csv_reader = csv.reader(response_text.splitlines())
+        next(csv_reader)
+        for row in csv_reader:
+            full_name, email, tech_stack, main_skill, main_skill_grade = row
+            first_name, last_name = full_name.split()
+            candidate = cls(first_name, last_name, email, tech_stack, main_skill, main_skill_grade)
+            candidates.append(candidate)
 
-    def __eq__(self, other):
-        return self.name == other.name and self.birth_date == other.birth_date
-
-    def __new__(cls, *args, **kwargs):
-        instance = super().__new__(cls)
-        print(f"Creating an instance of {cls.__name__}")
-        return instance
-
-class Planet:
-
-    def __init__(self, name):
-        self.name = name
-        self.humans = []
-
-    def to_str(self):
-        return f'Planet called: {self.name}'
-
-    def __str__(self):
-        return self.to_str()
-
-    def add_human(self, human):
-        self.humans.append(human)
-
-    def get_count(self):
-        return len(self.humans)
-
-    def __eq__(self, other):
-        return self.name == other.name
-
-    def __new__(cls, *args, **kwargs):
-        instance = super().__new__(cls)
-        print(f"Creating an instance of {cls.__name__}")
-        return instance
-
-human1 = Human("Denys", 1999)
-human2 = Human("Denys", 1999)
-human3 = Human("Sasha", 1997)
-print(human1,",",human1.get_age(),"years")
-
-planet1 = Planet("Mars")
-
-planet1.add_human(human1)
-planet1.add_human(human2)
-planet1.add_human(human3)
-
-planet2 = Planet("Jupiter")
-
-planet2.add_human(human1)
-planet2.add_human(human2)
+        return candidates
 
 
-print(planet1, f"and number of humans on the planet: {planet1.get_count()}")
 
-print(human1==human2, planet1==planet2)
+candidate1 = Candidate('Denys','Bezsmertnyi','denys@gmail.com',['Python','Java'],'Python','Middle')
+print(candidate1.full_name)
+
+candidates_csv = Candidate.generate_candidates('candidates.csv')
+for candidate in candidates_csv:
+    print(candidate.full_name, candidate.email, candidate.tech_stack)
+
+candidates_url = Candidate.generate_candidates('https://bitbucket.org/ivnukov/lesson2/raw/4f59074e6fbb552398f87636b5bf089a1618da0a/candidates.csv')
+for candidate in candidates_url:
+    print(candidate.full_name, candidate.email, candidate.tech_stack)
