@@ -4,6 +4,7 @@ import logging
 import traceback
 import datetime
 import requests
+import os
 
 from exceptions import EmailAlreadyExistsException
 
@@ -13,8 +14,8 @@ class Employee:
     def __init__(self, name, day_salary, email=None):
         self.name = name
         self.day_salary = day_salary
+        self.email = email
         if email:
-            self.email = email
             try:
                 self.validate(email)
                 self.save_email("emails.csv")
@@ -24,12 +25,14 @@ class Employee:
 
 
     def save_email(self, emails):
-        with open(emails, mode='a', newline='') as file:
+        csv_file_path = os.path.join(os.path.dirname(__file__), 'emails.csv')
+        with open(csv_file_path, mode='a', newline='') as file:
             save = csv.writer(file)
             save.writerow([self.email])
 
     def validate(self, email):
-        with open("emails.csv", mode='r', newline='') as file:
+        csv_file_path = os.path.join(os.path.dirname(__file__), 'emails.csv')
+        with open(csv_file_path, mode='r', newline='') as file:
             reader = csv.reader(file)
             for row in reader:
                 if email in row:
@@ -96,8 +99,8 @@ class Developer(Employee):
         return Developer(added_name, added_salary, added_tech_stack)
 
 
-employee1 = Employee("Denys", 999, 'gerbyboyz123@gmail.com')
-employee2 = Recruiter("Mark", 550, 'pupochek22812@yahoo.com')
+employee1 = Employee("Denys", 999, 'gerbyboyz1234@gmail.com')
+employee2 = Recruiter("Mark", 550, 'pupochek228124@yahoo.com')
 employee3 = Developer("Sofia", 550, ["Python", "JavaScript", "HTML", "CSS"])
 employee4 = Developer("John", 800, ["Java", "C#", "C++"])
 
@@ -128,9 +131,6 @@ class Candidate:
 
     @property
     def full_name(self):
-        """
-        return full name
-        """
         return f'{self.first_name} {self.last_name}'
 
     @classmethod
@@ -158,7 +158,8 @@ class Candidate:
 candidate1 = Candidate('Denys','Bezsmertnyi','denys@gmail.com',['Python','Java'],'Python','Middle')
 print(candidate1.full_name)
 
-candidates_csv = Candidate.generate_candidates('candidates.csv')
+candidates_csv_path = os.path.join(os.path.dirname(__file__), 'candidates.csv')
+candidates_csv = Candidate.generate_candidates(candidates_csv_path)
 for candidate in candidates_csv:
     print(candidate.full_name, candidate.email, candidate.tech_stack)
 
